@@ -40,9 +40,11 @@ kuningan, dan judul berhuruf serif, supaya terasa seperti membuka katalog perpus
 
 ### Unduh
 
-APK Android siap pasang tersedia di halaman
-[Releases](https://github.com/isyraqawwaluthorid/pustakaku/releases/latest)
-(Android 6.0 ke atas). Setelah memasang, buat akun baru dari layar *Daftar*.
+APK Android siap pasang (Android 6.0 ke atas):
+[**Unduh pustakaku-v1.1.0.apk**](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/download/pustakaku-v1.1.0/pustakaku-v1.1.0.apk)
+atau lihat halaman
+[Release Pustakaku v1.1.0](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/tag/pustakaku-v1.1.0).
+Setelah memasang, buat akun baru dari layar *Daftar*.
 
 | Versi | Tanggal | Isi |
 |-------|---------|-----|
