@@ -1,0 +1,60 @@
+rules_version = '2';
+
+// Authorization di sisi server. Deploy dengan:
+//   firebase deploy --only firestore:rules
+// atau tempel di Firebase Console > Firestore Database > Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // users/{uid}: profil + role
+    match /users/{uid} {
+      // Pengguna membaca profilnya sendiri; admin membaca semua (Panel Admin).
+      allow read: if isOwner(uid) || isAdmin();
+      // Saat registrasi, role wajib 'user' (tidak bisa mendaftar sebagai admin).
+      allow create: if isOwner(uid) && request.resource.data.role == 'user';
+      // Pengguna boleh mengubah profilnya sendiri TANPA menyentuh role;
+      // hanya admin yang boleh mengubah role.
+      allow update: if (isOwner(uid)
+                        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+                    || isAdmin();
+      allow delete: if isAdmin();
+
+      // Favorit bersifat privat per pengguna.
+      match /favorites/{bookId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // reviews: publik dibaca, dibuat oleh pemilik, dihapus oleh pemilik atau admin.
+    match /reviews/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 500;
+      allow update: if isOwner(resource.data.uid);
+      allow delete: if isOwner(resource.data.uid) || isAdmin();
+    }
+
+    // announcements: semua pengguna membaca, hanya admin yang menulis.
+    match /announcements/{id} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
