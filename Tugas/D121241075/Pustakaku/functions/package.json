@@ -1,0 +1,15 @@
+{
+  "name": "pustakaku-functions",
+  "description": "Cloud Functions Pustakaku: kirim push notification saat ada pengumuman baru",
+  "main": "index.js",
+  "engines": { "node": "20" },
+  "scripts": {
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "private": true
+}
