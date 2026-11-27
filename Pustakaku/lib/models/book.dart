@@ -11,6 +11,8 @@ final class Book implements Comparable<Book> {
     this.rating,
     this.pages,
     this.subjects = const [],
+    this.ebookAccess = EbookAccess.unavailable,
+    this.iaId,
   });
 
   final String workId; // contoh: OL45804W
@@ -21,6 +23,10 @@ final class Book implements Comparable<Book> {
   final double? rating;
   final int? pages;
   final List<String> subjects;
+  final EbookAccess ebookAccess;
+
+  /// ID edisi di Internet Archive yang bisa dibaca atau dipinjam.
+  final String? iaId;
 
   factory Book.fromJson(Json json) {
     final key = (json['key'] as String? ?? '').split('/').last;
@@ -34,6 +40,8 @@ final class Book implements Comparable<Book> {
       pages: json['number_of_pages_median'] as int?,
       subjects: (json['subject'] as List?)?.cast<String>().take(8).toList() ??
           const [],
+      ebookAccess: EbookAccess.fromApi(json['ebook_access'] as String?),
+      iaId: json['lending_identifier_s'] as String?,
     );
   }
 
@@ -46,6 +54,8 @@ final class Book implements Comparable<Book> {
         'coverId': coverId,
         'rating': rating,
         'pages': pages,
+        'ebookAccess': ebookAccess.name,
+        'iaId': iaId,
       };
 
   factory Book.fromMap(Json map) => Book(
@@ -56,10 +66,16 @@ final class Book implements Comparable<Book> {
         coverId: map['coverId'] as int?,
         rating: (map['rating'] as num?)?.toDouble(),
         pages: map['pages'] as int?,
+        ebookAccess: EbookAccess.values.asNameMap()[map['ebookAccess']] ??
+            EbookAccess.unavailable,
+        iaId: map['iaId'] as String?,
       );
 
   String get authorLabel =>
       authors.isEmpty ? 'Penulis tidak diketahui' : authors.take(2).join(', ');
+
+  /// Status baca dari Open Library, dipakai halaman detail.
+  ReadingInfo get reading => (access: ebookAccess, iaId: iaId);
 
   String? coverUrl([CoverSize size = CoverSize.medium]) =>
       coverId == null ? null : size.url(coverId!);
@@ -73,6 +89,43 @@ final class Book implements Comparable<Book> {
 
   @override
   int get hashCode => workId.hashCode;
+}
+
+/// Ketersediaan e-book dari field `ebook_access` Open Library.
+enum EbookAccess {
+  /// Domain publik: bisa dibaca gratis tanpa login.
+  public('Gratis dibaca'),
+
+  /// Harus dipinjam dengan akun Internet Archive.
+  borrowable('Bisa dipinjam'),
+
+  /// `printdisabled`, `no_ebook`, atau tidak diketahui.
+  unavailable('Belum bisa dibaca');
+
+  const EbookAccess(this.label);
+  final String label;
+
+  static EbookAccess fromApi(String? value) => switch (value) {
+        'public' => EbookAccess.public,
+        'borrowable' => EbookAccess.borrowable,
+        _ => EbookAccess.unavailable,
+      };
+}
+
+/// Record: status baca sebuah karya dan edisi yang dipakai.
+typedef ReadingInfo = ({EbookAccess access, String? iaId});
+
+extension ReadingInfoX on ReadingInfo {
+  /// Halaman yang dibuka tombol baca/pinjam, atau null bila tidak ada.
+  Uri? url(String workId) => switch (this) {
+        (access: EbookAccess.public, iaId: final String id) =>
+          Uri.https('archive.org', '/details/$id', {'view': 'theater'}),
+        // Edisi pinjaman bisa berbahasa lain, jadi biarkan pengguna memilih
+        // edisinya sendiri di halaman karya Open Library.
+        (access: EbookAccess.borrowable, iaId: _) =>
+          Uri.https('openlibrary.org', '/works/$workId'),
+        _ => null,
+      };
 }
 
 /// Enhanced enum: enum dengan field & method (Dart 2.17+).

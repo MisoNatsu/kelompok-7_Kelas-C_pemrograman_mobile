@@ -55,6 +55,8 @@ class BookCard extends ConsumerWidget {
                           if (book.pages case final pages?) _Badge('$pages hlm'),
                           if (book.rating case final rating?)
                             _Badge('★ ${rating.toStringAsFixed(1)}'),
+                          if (book.ebookAccess == EbookAccess.public)
+                            const _Badge('Bisa dibaca', highlight: true),
                         ],
                       ),
                     ],
@@ -85,18 +87,26 @@ class BookCard extends ConsumerWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge(this.label);
+  const _Badge(this.label, {this.highlight = false});
   final String label;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: p.accentSoft, borderRadius: BorderRadius.circular(6)),
+      decoration: BoxDecoration(
+        color: highlight ? p.primarySoft : p.accentSoft,
+        borderRadius: BorderRadius.circular(6),
+      ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: p.onAccentSoft),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: highlight ? p.primary : p.onAccentSoft,
+        ),
       ),
     );
   }

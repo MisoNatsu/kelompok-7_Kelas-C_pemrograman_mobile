@@ -97,4 +97,44 @@ void main() {
       expect(looksLikeImage([0x89, 0x50, 0x4E, 0x47, ...List.filled(20, 0)]), isTrue);
     });
   });
+
+  group('Fitur baca', () {
+    test('fromJson membaca ebook_access dan edisi Internet Archive', () {
+      final book = Book.fromJson({
+        'key': '/works/OL66554W',
+        'title': 'Pride and Prejudice',
+        'ebook_access': 'public',
+        'lending_identifier_s': 'prideprejudice0000jane_u2q4',
+      });
+      expect(book.ebookAccess, EbookAccess.public);
+      expect(book.iaId, 'prideprejudice0000jane_u2q4');
+      expect(EbookAccess.fromApi('printdisabled'), EbookAccess.unavailable);
+      expect(EbookAccess.fromApi(null), EbookAccess.unavailable);
+    });
+
+    test('status baca ikut tersimpan di favorit', () {
+      const book = Book(
+        workId: 'OL82563W',
+        title: 'Harry Potter',
+        authors: [],
+        ebookAccess: EbookAccess.borrowable,
+        iaId: 'isbn_9757501956008',
+      );
+      final copy = Book.fromMap(book.toMap());
+      expect(copy.ebookAccess, EbookAccess.borrowable);
+      expect(copy.iaId, 'isbn_9757501956008');
+      expect(Book.fromMap({'workId': 'x', 'title': 'Lama'}).ebookAccess, EbookAccess.unavailable);
+    });
+
+    test('URL: gratis ke pembaca, pinjam ke halaman karya, lainnya tidak ada', () {
+      const ReadingInfo free = (access: EbookAccess.public, iaId: 'abc');
+      const ReadingInfo borrow = (access: EbookAccess.borrowable, iaId: 'zzz');
+      const ReadingInfo none = (access: EbookAccess.unavailable, iaId: null);
+      const ReadingInfo freeNoId = (access: EbookAccess.public, iaId: null);
+      expect(free.url('OL1W').toString(), 'https://archive.org/details/abc?view=theater');
+      expect(borrow.url('OL1W').toString(), 'https://openlibrary.org/works/OL1W');
+      expect(none.url('OL1W'), isNull);
+      expect(freeNoId.url('OL1W'), isNull);
+    });
+  });
 }
