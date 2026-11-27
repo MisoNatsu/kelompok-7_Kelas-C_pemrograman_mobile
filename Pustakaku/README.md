@@ -50,11 +50,7 @@ atau lihat halaman
 [Release Pustakaku v1.2.0](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/tag/pustakaku-v1.2.0).
 Setelah memasang, buat akun baru dari layar *Daftar*.
 
-| Versi | Tanggal | Isi |
-|-------|---------|-----|
-| v1.2.0 | 27 Nov 2026 | Fitur baca: tombol *Baca gratis* untuk buku domain publik (pembaca di dalam aplikasi), *Pinjam di Open Library* untuk buku pinjaman, kategori *Gratis dibaca*, label *Bisa dibaca*. Minimum Android 7.0 |
-| v1.1.0 | 22 Nov 2026 | Tampilan baru Perpustakaan Klasik, ikon & splash baru, perbaikan sampul yang tidak muncul, label navigasi tidak terlipat |
-| v1.0.0 | 16 Nov 2026 | Rilis pertama: semua fitur, terhubung ke Firebase, push notification terverifikasi |
+Versi terbaru: **v1.2.0** (27 Nov 2026), sudah termasuk fitur baca buku.
 
 ## Pemenuhan Minimum Requirement
 
