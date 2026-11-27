@@ -147,3 +147,11 @@ final bookDetailProvider =
   final result = await ref.watch(openLibraryApiProvider).detail(workId);
   return result.getOrThrow();
 });
+
+/// Status baca sebuah karya. Dipakai untuk buku yang datanya belum memuat
+/// `ebook_access`, misalnya favorit yang disimpan sebelum fitur baca ada.
+final readingInfoProvider =
+    FutureProvider.autoDispose.family<ReadingInfo, String>((ref, workId) async {
+  final result = await ref.watch(openLibraryApiProvider).readingInfo(workId);
+  return result.getOrThrow();
+});

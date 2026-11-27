@@ -9,17 +9,18 @@ import '../widgets/empty_state.dart';
 import '../widgets/skeleton.dart';
 import 'book_detail_screen.dart';
 
-/// Kategori di beranda. Nilai kedua adalah subjek Open Library
-/// (`subject:<nama>`), `null` berarti kembali ke buku tren.
+/// Kategori di beranda. Nilai kedua adalah kueri pencarian Open Library,
+/// `null` berarti kembali ke buku tren.
 const _genres = <(String, String?)>[
   ('Semua', null),
-  ('Fiksi', 'fiction'),
-  ('Bisnis', 'business'),
-  ('Psikologi', 'psychology'),
-  ('Sejarah', 'history'),
-  ('Sains', 'science'),
-  ('Fantasi', 'fantasy'),
-  ('Romansa', 'romance'),
+  ('Gratis dibaca', 'ebook_access:public'),
+  ('Fiksi', 'subject:fiction'),
+  ('Bisnis', 'subject:business'),
+  ('Psikologi', 'subject:psychology'),
+  ('Sejarah', 'subject:history'),
+  ('Sains', 'subject:science'),
+  ('Fantasi', 'subject:fantasy'),
+  ('Romansa', 'subject:romance'),
 ];
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -58,16 +59,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       );
 
-  void _pickGenre(String label, String? subject) {
+  void _pickGenre(String label, String? query) {
     final search = ref.read(bookSearchProvider.notifier);
     _controller.clear();
     FocusScope.of(context).unfocus();
-    if (subject == null) {
+    if (query == null) {
       setState(() => _genre = null);
       search.clear();
     } else {
       setState(() => _genre = label);
-      search.search('subject:$subject');
+      search.search(query);
     }
   }
 
@@ -133,11 +134,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 itemCount: _genres.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
-                  final (label, subject) = _genres[i];
+                  final (label, query) = _genres[i];
                   return _GenreChip(
                     label: label,
                     selected: label == activeGenre,
-                    onTap: () => _pickGenre(label, subject),
+                    onTap: () => _pickGenre(label, query),
                   );
                 },
               ),

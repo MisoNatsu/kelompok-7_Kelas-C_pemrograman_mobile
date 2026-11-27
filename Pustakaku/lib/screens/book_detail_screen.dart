@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/extensions.dart';
 import '../models/book.dart';
@@ -9,6 +11,7 @@ import '../widgets/book_cover.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/rating_stars.dart';
 import '../widgets/skeleton.dart';
+import 'reader_screen.dart';
 
 class BookDetailScreen extends ConsumerWidget {
   const BookDetailScreen({super.key, required this.book, this.heroTag});
@@ -27,6 +30,11 @@ class BookDetailScreen extends ConsumerWidget {
     final avg = ref.watch(averageRatingProvider(book.workId));
     final me = ref.watch(appUserProvider).value;
     final reviewCount = reviews.value?.length ?? 0;
+    // Data dari daftar dipakai langsung; favorit lama ditanyakan ke Open Library.
+    final ReadingInfo? reading = book.ebookAccess != EbookAccess.unavailable
+        ? book.reading
+        : ref.watch(readingInfoProvider(book.workId)).value;
+    final readUrl = reading?.url(book.workId);
 
     Future<void> toggleFav() async {
       final r = await ref.read(toggleFavoriteProvider)(book);
@@ -101,6 +109,10 @@ class BookDetailScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
+                if (reading != null && readUrl != null) ...[
+                  _ReadAction(book: book, access: reading.access, url: readUrl),
+                  const SizedBox(height: 10),
+                ],
                 Row(
                   children: [
                     Expanded(
@@ -129,6 +141,21 @@ class BookDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                if (reading?.access == EbookAccess.unavailable) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 16, color: p.muted),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Belum ada e-book yang bisa dibaca untuk buku ini.',
+                          style: TextStyle(fontSize: 13, color: p.muted),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 28),
                 const SectionHeader('Tentang buku ini'),
                 const SizedBox(height: 8),
@@ -279,6 +306,63 @@ class BookDetailScreen extends ConsumerWidget {
     res.when(
       success: (_) => context.showSnack('Terima kasih atas ulasanmu!'),
       failure: (m) => context.showSnack(m, error: true),
+    );
+  }
+}
+
+/// Tombol baca (buku domain publik) atau pinjam (perlu akun Internet Archive).
+class _ReadAction extends StatelessWidget {
+  const _ReadAction({required this.book, required this.access, required this.url});
+  final Book book;
+  final EbookAccess access;
+  final Uri url;
+
+  Future<void> _openExternal(BuildContext context) async {
+    final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) context.showSnack('Browser tidak dapat dibuka', error: true);
+  }
+
+  void _read(BuildContext context) {
+    // WebView tidak tersedia di web, jadi buka tab baru.
+    if (kIsWeb) {
+      _openExternal(context);
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ReaderScreen(title: book.title, url: url)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final (button, caption) = switch (access) {
+      EbookAccess.public => (
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: p.accent, foregroundColor: p.onPrimary),
+            onPressed: () => _read(context),
+            icon: const Icon(Icons.auto_stories_rounded),
+            label: const Text('Baca gratis'),
+          ),
+          'Domain publik, dibaca lewat Internet Archive',
+        ),
+      _ => (
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+            onPressed: () => _openExternal(context),
+            icon: const Icon(Icons.local_library_outlined),
+            label: const Text('Pinjam di Open Library'),
+          ),
+          'Perlu akun Internet Archive untuk meminjam',
+        ),
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        button,
+        const SizedBox(height: 6),
+        Text(caption, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: p.muted)),
+      ],
     );
   }
 }

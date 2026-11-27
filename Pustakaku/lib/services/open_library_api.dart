@@ -21,7 +21,7 @@ final class OpenLibraryApi with LoggerMixin {
   static const _host = 'openlibrary.org';
   static const _fields =
       'key,title,author_name,first_publish_year,cover_i,subject,'
-      'ratings_average,number_of_pages_median';
+      'ratings_average,number_of_pages_median,ebook_access,lending_identifier_s';
 
   Future<Result<T>> _get<T>(
     Uri uri,
@@ -81,6 +81,21 @@ final class OpenLibraryApi with LoggerMixin {
   Future<Result<BookDetail>> detail(String workId) {
     final uri = Uri.https(_host, '/works/$workId.json');
     return _get(uri, BookDetail.fromJson);
+  }
+
+  /// Status baca satu karya (gratis, pinjam, atau belum tersedia).
+  Future<Result<ReadingInfo>> readingInfo(String workId) {
+    final uri = Uri.https(_host, '/search.json', {
+      'q': 'key:/works/$workId',
+      'fields': 'key,ebook_access,lending_identifier_s',
+      'limit': '1',
+    });
+    return _get(uri, (json) {
+      final docs = (json['docs'] as List? ?? const []).cast<Json>();
+      return docs.isEmpty
+          ? (access: EbookAccess.unavailable, iaId: null)
+          : Book.fromJson(docs.first).reading;
+    });
   }
 
   void dispose() => _client.close();

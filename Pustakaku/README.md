@@ -1,6 +1,6 @@
 # Pustakaku
 
-Aplikasi mobile Flutter untuk mencari, menyimpan, dan mengulas buku. Data buku
+Aplikasi mobile Flutter untuk mencari, membaca, menyimpan, dan mengulas buku. Data buku
 diambil dari **Open Library API** (open source, tanpa API key), sedangkan akun,
 favorit, ulasan, pengumuman, dan push notification ditangani **Firebase**.
 
@@ -9,23 +9,27 @@ Dibuat sebagai Projek Akhir mata kuliah Pemrograman Mobile.
 ## Tentang Aplikasi
 
 **Pustakaku** adalah rak buku digital di saku. Pengguna bisa menjelajah jutaan judul
-dari Open Library, menyimpan buku yang ingin dibaca ke rak pribadi, memberi rating dan
-ulasan, serta menerima pengumuman dari admin lewat push notification. Tampilannya
+dari Open Library, membaca buku domain publik secara gratis langsung di aplikasi,
+menyimpan buku yang ingin dibaca ke rak pribadi, memberi rating dan ulasan, serta
+menerima pengumuman dari admin lewat push notification. Tampilannya
 bergaya **Perpustakaan Klasik**: kertas krem, hijau tua khas perpustakaan, aksen
 kuningan, dan judul berhuruf serif, supaya terasa seperti membuka katalog perpustakaan.
 
 ### Alur penggunaan
 
 1. **Daftar / masuk** dengan email dan kata sandi. Akun baru otomatis berperan `user`.
-2. **Jelajah**: lihat buku tren hari ini, pilih kategori (Fiksi, Bisnis, Psikologi,
-   Sejarah, Sains, Fantasi, Romansa), atau cari judul, penulis, maupun ISBN.
+2. **Jelajah**: lihat buku tren hari ini, pilih kategori (Gratis dibaca, Fiksi, Bisnis,
+   Psikologi, Sejarah, Sains, Fantasi, Romansa), atau cari judul, penulis, maupun ISBN.
 3. **Detail buku**: sampul besar, tahun terbit, jumlah halaman, rating, deskripsi,
    subjek, dan ulasan pembaca lain.
-4. **Simpan ke rak**: buku masuk ke tab *Rak bukuku* dan tersinkron di semua perangkat.
-5. **Ulas**: beri 1–5 bintang dan komentar. Ulasan bisa dihapus oleh penulisnya atau admin.
-6. **Pengumuman**: admin menulis pengumuman; pengguna melihatnya secara realtime dan
+4. **Baca**: buku domain publik punya tombol *Baca gratis* yang membuka pembaca
+   Internet Archive di dalam aplikasi. Buku yang hanya bisa dipinjam punya tombol
+   *Pinjam di Open Library* (perlu akun Internet Archive).
+5. **Simpan ke rak**: buku masuk ke tab *Rak bukuku* dan tersinkron di semua perangkat.
+6. **Ulas**: beri 1–5 bintang dan komentar. Ulasan bisa dihapus oleh penulisnya atau admin.
+7. **Pengumuman**: admin menulis pengumuman; pengguna melihatnya secara realtime dan
    menerima push notification.
-7. **Admin**: tab khusus admin untuk melihat statistik pengguna dan mengubah role.
+8. **Admin**: tab khusus admin untuk melihat statistik pengguna dan mengubah role.
 
 ### Teknologi
 
@@ -40,14 +44,15 @@ kuningan, dan judul berhuruf serif, supaya terasa seperti membuka katalog perpus
 
 ### Unduh
 
-APK Android siap pasang (Android 6.0 ke atas):
-[**Unduh pustakaku-v1.1.0.apk**](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/download/pustakaku-v1.1.0/pustakaku-v1.1.0.apk)
+APK Android siap pasang (Android 7.0 ke atas):
+[**Unduh pustakaku-v1.2.0.apk**](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/download/pustakaku-v1.2.0/pustakaku-v1.2.0.apk)
 atau lihat halaman
-[Release Pustakaku v1.1.0](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/tag/pustakaku-v1.1.0).
+[Release Pustakaku v1.2.0](https://github.com/MisoNatsu/kelompok-7_Kelas-C_pemrograman_mobile/releases/tag/pustakaku-v1.2.0).
 Setelah memasang, buat akun baru dari layar *Daftar*.
 
 | Versi | Tanggal | Isi |
 |-------|---------|-----|
+| v1.2.0 | 27 Nov 2026 | Fitur baca: tombol *Baca gratis* untuk buku domain publik (pembaca di dalam aplikasi), *Pinjam di Open Library* untuk buku pinjaman, kategori *Gratis dibaca*, label *Bisa dibaca*. Minimum Android 7.0 |
 | v1.1.0 | 22 Nov 2026 | Tampilan baru Perpustakaan Klasik, ikon & splash baru, perbaikan sampul yang tidak muncul, label navigasi tidak terlipat |
 | v1.0.0 | 16 Nov 2026 | Rilis pertama: semua fitur, terhubung ke Firebase, push notification terverifikasi |
 
@@ -59,7 +64,7 @@ Setelah memasang, buat akun baru dari layar *Daftar*.
 | 2 | **State management** | **Riverpod 3**: `Provider`, `StreamProvider`, `FutureProvider.family`, `Notifier` (pencarian + debounce + infinite scroll), `AsyncNotifier` (form auth), provider turunan (`isAdminProvider`, `isFavoriteProvider`, `averageRatingProvider`) | `lib/providers/*.dart` |
 | 3 | **Advance Dart** | `sealed class` + pattern matching (`Result<T>`, `SearchState`), generics (`_get<T>`, `AsyncValueWidget<T>`), extension methods, mixin (`LoggerMixin`, `ValidatorsMixin`), enhanced enum (`UserRole`, `CoverSize`), records (`SearchPage`), `switch` expression dengan guard `when`, isolate (`compute`) untuk parsing JSON, `Comparable`, `Stream`/`async*`, `late`/null-safety | `lib/core/*.dart`, `lib/models/*.dart`, `lib/services/open_library_api.dart` |
 | 4 | **Push Notifications** | Firebase Cloud Messaging: izin notifikasi, token disimpan ke Firestore, subscribe topic `pengumuman`, notifikasi foreground via `flutter_local_notifications`, handler background, tap notifikasi membuka tab Pengumuman. Cloud Function mengirim FCM otomatis saat admin membuat pengumuman | `lib/services/notification_service.dart`, `lib/providers/notification_provider.dart`, `functions/index.js` |
-| 5 | **API (open source)** | [Open Library API](https://openlibrary.org/developers/api): pencarian (`/search.json`), tren (`/trending/daily.json`), detail karya (`/works/{id}.json`), sampul (`covers.openlibrary.org`) | `lib/services/open_library_api.dart` |
+| 5 | **API (open source)** | [Open Library API](https://openlibrary.org/developers/api): pencarian (`/search.json`), tren (`/trending/daily.json`), detail karya (`/works/{id}.json`), sampul (`covers.openlibrary.org`), status e-book (`ebook_access`) dan pembaca Internet Archive | `lib/services/open_library_api.dart` |
 | 6 | **Authentication dan Authorization** | *Authentication*: daftar, masuk, reset kata sandi, keluar (Firebase Auth). *Authorization*: role `user`/`admin` di `users/{uid}.role`; tab Admin & tombol buat/hapus pengumuman hanya untuk admin; ulasan hanya bisa dihapus pemilik atau admin; semuanya ditegakkan ulang di **Firestore Security Rules** | `lib/providers/auth_provider.dart`, `lib/screens/admin_screen.dart`, `firestore.rules` |
 
 ## Tampilan
@@ -78,8 +83,9 @@ sebuah `ThemeExtension`), termasuk varian mode gelap.
 
 ## Fitur
 
-- **Jelajah** – carousel buku tren harian, chip kategori (Fiksi, Bisnis, Psikologi, dst. lewat pencarian `subject:`), pencarian judul/penulis/ISBN dengan debounce 500 ms dan *infinite scroll*.
+- **Jelajah** – carousel buku tren harian, chip kategori (Gratis dibaca lewat `ebook_access:public`; Fiksi, Bisnis, Psikologi, dst. lewat `subject:`), pencarian judul/penulis/ISBN dengan debounce 500 ms dan *infinite scroll*.
 - **Detail buku** – sampul, deskripsi, subjek, rating Open Library, rating rata-rata pembaca Pustakaku, daftar ulasan, tulis ulasan.
+- **Baca buku** – buku domain publik (`ebook_access: public`) dibaca gratis lewat pembaca Internet Archive di dalam aplikasi (`webview_flutter`); buku pinjaman (`borrowable`) dibuka di halaman Open Library. Kategori *Gratis dibaca* menampilkan khusus buku yang bisa dibaca.
 - **Favorit** – rak sampul tiga kolom; tersimpan di Firestore (`users/{uid}/favorites`) dan tersinkron realtime antar perangkat.
 - **Pengumuman** – daftar pengumuman realtime; admin membuat pengumuman dan semua pengguna menerima push notification (otomatis bila Cloud Function di-deploy, lihat bagian Push notification; tanpa itu dikirim dari Firebase Console ke topic `pengumuman`).
 - **Panel Admin** – statistik pengguna dan ubah role (user ⇄ admin).
@@ -104,7 +110,7 @@ lib/
 │   └── notification_service.dart # FCM + notifikasi lokal
 ├── providers/                    # Riverpod (state management)
 ├── screens/                      # login, register, main_shell, home, book_detail,
-│                                 # favorites, announcements, admin, profile
+│                                 # reader, favorites, announcements, admin, profile
 └── widgets/                      # BookCard, BookCover, RatingStars, AsyncValueWidget, EmptyState
 functions/index.js                # Cloud Function: pengumuman baru -> FCM topic
 firestore.rules                   # Authorization sisi server

@@ -31,7 +31,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Firebase Auth & Firestore terbaru membutuhkan minimal API 23
-        minSdk = maxOf(23, flutter.minSdkVersion)
+        minSdk = maxOf(24, flutter.minSdkVersion)
         multiDexEnabled = true
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
